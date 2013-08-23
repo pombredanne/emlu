@@ -59,7 +59,7 @@ class Umounter(Thread):
 
 class MLUDaemon(GenericDaemon):
 
-    def init(self, config):
+    def init(self):
 
         self.m_event = Event()
         self.u_event = Event()
@@ -67,8 +67,11 @@ class MLUDaemon(GenericDaemon):
         self.m = Mounter(self.m_event)
         self.u = Umounter(self.u_event)
 
-    def process(self):
-        pass
+    def loop(self):
+
+        self.init()
+        while True:
+            sleep(10)
 
     def terminate(self):
 

@@ -26,8 +26,8 @@ class GenericDaemon(object):
     """
     A generic UNIX daemon base class.
 
-    Subclass this class and override the run() method with the continous task
-    your daemon needs to perform. The run() method should never return.
+    Subclass this class and override the loop() method with the continous task
+    your daemon needs to perform. The loop() method should never return.
     Optionally, override the terminate() method to implement any clean up or
     any routines that should run at daemon termination (daemons are always
     terminated by a SIGTERM signal).
@@ -138,32 +138,39 @@ class GenericDaemon(object):
         os.remove(self.pidfile)
         sys.exit(0)
 
-    def run(self):
-        """Worker method.
+    def loop(self):
+        """
+        Worker method.
 
-        It will be called after the process has been daemonized
-        by start() or restart(). You'll have to overwrite this
-        method with the daemon program logic.
+        It will be called after the process has been daemonized by start() or
+        restart(). You must override this method and provide that it never
+        returns.
         """
         while True:
             time.sleep(1)
 
     def terminate(self):
+        """
+        Clean-up method.
+
+        It will be called at the termination of the daemon process. You can
+        optionally override this method if your daemon requires to clean-up or
+        release resources before quiting.
+        """
         pass
 
 
 class DaemonCtrl(object):
-    """Control class for a daemon.
+    """
+    Control class for a daemon.
 
     Usage:
-    >>> dc = DaemonCtrl(GenericDaemon, '/tmp/foo.pid')
+    >>> dc = DaemonCtrl(GenericDaemon, config)
     >>> dc.start()
 
-    This class is the control wrapper for the above (daemon_base)
-    class. It adds start/stop/restart functionality for it withouth
-    creating a new daemon every time.
+    This class allows to control (stop) or spawn (start) a daemon class.
     """
-    def __init__(self, daemonclass, config):
+    def __init__(self, daemoncls, config):
         """Constructor.
 
         @param daemoncls: daemon class (not instance)

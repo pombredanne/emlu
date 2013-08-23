@@ -16,11 +16,53 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Module for fstab file parsing.
-See http://en.wikipedia.org/wiki/Fstab
+Module for mount command and fstab file parsing.
 
 Note: This modules is Python 2.7 and 3.x compatible.
 """
+
+import subprocess
+
+def parse_mount():
+
+    """
+    Parse the output of the 'mount' command returning a list of dictionaries of
+    the type:
+
+    [   {   'file_system': 'proc',
+            'mount_point': '/proc',
+            'options': ['rw', 'noexec', 'nosuid', 'nodev'],
+            'type': 'proc'}
+        ...
+    ]
+
+    This function can raise two exceptions:
+        - OSError, if mount command cannot be found.
+        - CalledProcessError, if the result of the execution of mount returns
+          non-zero.
+    """
+
+    out = subprocess.check_output(['/bin/mount'])
+    lines = out.split('\n')
+    entries = []
+    for l in lines:
+        l = l.strip()
+        if not l:
+            continue
+        parts = l.split()
+        if len(parts) != 6:
+            raise Exception('mount output is malformed.')
+
+        entry = {
+                'file_system': parts[0],
+                'mount_point': parts[2],
+                'type'       : parts[4],
+                'options'    : parts[5][1:-1].split(','),
+            }
+        entries.append(entry)
+
+    return entries
+
 
 def parse_fstab():
 
@@ -76,4 +118,7 @@ def parse_fstab():
 # Test
 if __name__ == '__main__':
     from pprint import pprint
+    print('################ parse_mount() ################')
+    pprint(parse_mount(), indent=4)
+    print('################ parse_fstab() ################')
     pprint(parse_fstab(), indent=4)
