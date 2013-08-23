@@ -78,7 +78,7 @@ class GenericDaemon(object):
 
         # Check working directory
         if not os.path.isdir(self.workpath):
-            self._fatal('Working directory does not exist!', '')
+            self._fatal('Working directory doesn\'t exist.', '')
 
         # Exit first parent process
         try:
@@ -89,7 +89,8 @@ class GenericDaemon(object):
             self._fatal('Fork #1 failed: {0}', err)
 
         # Decouple from parent environment
-        try: os.chdir(self.workpath)
+        try:
+            os.chdir(self.workpath)
         except OSError as err:
             self._fatal('Path change failed: {0}', err)
 
@@ -105,7 +106,7 @@ class GenericDaemon(object):
             if pid > 0:
                 sys.exit(0)
         except OSError as err:
-            self.perror('Fork #2 failed: {0}', err)
+            self._fatal('Fork #2 failed: {0}', err)
 
         # Write pidfile
         pid = str(os.getpid())
@@ -131,6 +132,7 @@ class GenericDaemon(object):
         Daemon common termination routine.
         """
         self.terminate()
+        sys.stdin.close()
         sys.stdout.close()
         sys.stderr.close()
         os.remove(self.pidfile)
@@ -172,7 +174,8 @@ class DaemonCtrl(object):
         self.config = config
 
     def start(self):
-        """Start the daemon.
+        """
+        Start the daemon.
         """
         try: # check for pidfile to see if the daemon already runs
             with open(self.pidfile, 'r') as pf:
@@ -191,7 +194,8 @@ class DaemonCtrl(object):
         d.daemonize()
 
     def stop(self):
-        """Stop the daemon.
+        """
+        Stop the daemon.
 
         This is purely based on the pidfile / process control
         and does not reference the daemon class directly.

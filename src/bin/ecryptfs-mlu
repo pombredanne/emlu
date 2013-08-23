@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 #
-# Copyright (C) 2009 Sander Marechal
 # Copyright (C) 2013 Carlos Jenkins <carlos@jenkins.co.cr>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -17,28 +16,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from ecrypts_mlu import *
+import sys
+from ecryptfs_mlu import *
 
 if __name__ == '__main__':
-    """
-    Daemon test logic.
 
-    This logic must be called as seperate executable (i.e. python3
-    daemon.py start/stop/restart).  See test_daemon.py for
-    implementation.
-    """
-    usage = 'Missing parameter, usage of test logic:\n' + \
-            ' % python3 daemon.py start|restart|stop\n'
+    usage = 'Usage: ecryptfs-mlu [start|stop|restart]'
     if len(sys.argv) < 2:
         sys.stderr.write(usage)
-        sys.exit(2)
+        sys.exit(1)
 
     config = read_config()
     dc = DaemonCtrl(MLUDaemon, config)
 
-    if sys.argv[1] == 'start':
+    param = sys.argv[1]
+    if param == 'start':
         dc.start()
-    elif sys.argv[1] == 'stop':
+    elif param == 'stop':
         dc.stop()
-    elif sys.argv[1] == 'restart':
+    elif param == 'restart':
         dc.restart()
+    else:
+        sys.stderr.write('Unknown param "{}".'.format(param) + '\n')
+        sys.exit(2)
+

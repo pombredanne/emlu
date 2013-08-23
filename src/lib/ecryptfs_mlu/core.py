@@ -25,7 +25,7 @@ class Mounter(Thread):
             sleep(10)
 
 
-class WatchedMountPoint(object):
+class MountPoint(object):
 
     def __init__(self, name, mount_point, publish):
 
@@ -46,7 +46,7 @@ class Umounter(Thread):
 
     def run(self):
 
-        # Get list of mounts to watch (defined and already mounted)
+        # Get list of mount points to watch (defined and already mounted)
 
         # Loop
         while True:

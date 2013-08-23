@@ -72,6 +72,7 @@ def parse_fstab():
 
     return entries
 
+
 # Test
 if __name__ == '__main__':
     from pprint import pprint

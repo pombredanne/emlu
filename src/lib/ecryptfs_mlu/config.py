@@ -15,6 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+Module for reading a JSON formatted configuration file.
+
+Note: This modules is Python 2.7 and 3.x compatible.
+"""
+
+import json
 from os.path import exists
 
 def read_config():
@@ -24,8 +31,10 @@ def read_config():
         config = 'ecryptfs-mlu.conf'
 
     with open(config, 'r') as f:
-        return json.load(f.read())
+        return json.loads(f.read())
 
+
+# Test
 if __name__ == '__main__':
     from pprint import pprint
     pprint(read_config())

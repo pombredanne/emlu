@@ -17,3 +17,4 @@
 
 from .daemon import DaemonCtrl
 from .core import MLUDaemon
+from .config import read_config
