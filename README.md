@@ -1,7 +1,7 @@
 ecryptfs-mlu
 ============
 
-[ecryptfs] [] mounter, listener, umounter daemon.
+[ecryptfs] [] file system mounter, listener and umounter daemon.
 
 Work in progress.
 

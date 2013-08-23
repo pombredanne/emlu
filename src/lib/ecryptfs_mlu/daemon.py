@@ -38,18 +38,18 @@ class GenericDaemon(object):
 
     - 'pidfile': path to put the pid file. Default is '/var/run/daemon.py.pid'
     - 'workdir': working directory of the daemon. Default is '/'
-    - 'stdin'  : path to a file to use as std input. Default is '/dev/null'
-    - 'stdout' : path to a file to use as std output. Default is '/dev/null'
-    - 'stderr' : path to a file to use as std error. Default is '/dev/null'
+    - 'stdin'  : path to a file to use as std input. Default is os.devnull
+    - 'stdout' : path to a file to use as std output. Default is os.devnull
+    - 'stderr' : path to a file to use as std error. Default is os.devnull
     """
     def __init__(self, config):
 
         conf = {
             'pidfile'  : '/var/run/daemon.py.pid',
             'workdir'  : '/',
-            'stdin'    : '/dev/null',
-            'stdout'   : '/dev/null',
-            'stderr'   : '/dev/null',
+            'stdin'    : os.devnull,
+            'stdout'   : os.devnull,
+            'stderr'   : os.devnull,
         }
         conf.update(config)
         self.config = conf
