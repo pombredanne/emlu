@@ -30,7 +30,7 @@ def parse_mount():
     the type:
 
     [   {   'file_system': 'proc',
-            'mount_point': '/proc',
+            'mp' : '/proc',
             'options': ['rw', 'noexec', 'nosuid', 'nodev'],
             'type': 'proc'}
         ...
@@ -55,13 +55,24 @@ def parse_mount():
 
         entry = {
                 'file_system': parts[0],
-                'mount_point': parts[2],
+                'mp'         : parts[2],
                 'type'       : parts[4],
                 'options'    : parts[5][1:-1].split(','),
             }
         entries.append(entry)
 
     return entries
+
+
+def is_mounted(mount_point):
+    """
+    Check if a particular mount point is already mounted.
+    """
+    mounted = parse_mount()
+    for m in mounted:
+        if m['mp'] == mount_point:
+            return m
+    return None
 
 
 def parse_fstab():
@@ -71,7 +82,7 @@ def parse_fstab():
 
     [   {   'dump': '0',
             'file_system': 'proc',
-            'mount_point': '/proc',
+            'mp' : '/proc',
             'options': ['nodev', 'noexec', 'nosuid'],
             'pass': '0',
             'type': 'proc'},
@@ -104,7 +115,7 @@ def parse_fstab():
 
         entry = {
                 'file_system': parts[0],
-                'mount_point': parts[1],
+                'mp'         : parts[1],
                 'type'       : parts[2],
                 'options'    : parts[3].split(','),
                 'dump'       : parts[4],
@@ -115,10 +126,25 @@ def parse_fstab():
     return entries
 
 
+def is_listed(mount_point):
+    """
+    Check if a particular mount point is listed in the fstab.
+    """
+    listed = parse_fstab()
+    for l in listed:
+        if l['mp'] == mount_point:
+            return l
+    return None
+
+
 # Test
 if __name__ == '__main__':
     from pprint import pprint
     print('################ parse_mount() ################')
     pprint(parse_mount(), indent=4)
+    print('################ is_mounted() ################')
+    print('is_mounted(\'/proc\') : {}'.format(is_mounted('/proc')))
     print('################ parse_fstab() ################')
     pprint(parse_fstab(), indent=4)
+    print('################ is_listed() ################')
+    print('is_listed(\'/proc\') : {}'.format(is_listed('/proc')))

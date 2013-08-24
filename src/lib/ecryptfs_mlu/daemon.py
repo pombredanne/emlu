@@ -184,13 +184,15 @@ class DaemonCtrl(object):
         """
         Start the daemon.
         """
-        try: # check for pidfile to see if the daemon already runs
+        # Check for pidfile to see if the daemon already runs
+        try:
             with open(self.pidfile, 'r') as pf:
                 pid = int(pf.read().strip())
         except IOError:
             pid = None
 
         if pid:
+            # FIXME: Check on /proc/{pid}/status and remove PID file if necesarry
             message = "pidfile {0} already exist. " + \
                     "Daemon already running?\n"
             sys.stderr.write(message.format(self.pidfile))
@@ -203,11 +205,10 @@ class DaemonCtrl(object):
     def stop(self):
         """
         Stop the daemon.
-
-        This is purely based on the pidfile / process control
-        and does not reference the daemon class directly.
         """
-        try: # get the pid from the pidfile
+
+        # Get the pid from the pidfile
+        try:
             with open(self.pidfile,'r') as pf:
                 pid = int(pf.read().strip())
         except IOError:
@@ -217,9 +218,10 @@ class DaemonCtrl(object):
             message = "pidfile {0} does not exist. " + \
                     "Daemon not running?\n"
             sys.stderr.write(message.format(self.pidfile))
-            return # not an error in a restart
+            return # Not an error in a restart
 
-        try: # try killing the daemon process
+        # Try killing the daemon process
+        try:
             while 1:
                 os.kill(pid, signal.SIGTERM)
                 time.sleep(0.1)

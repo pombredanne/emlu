@@ -16,13 +16,46 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from time import sleep
-from threading Thread, Event
+from threading import Thread, Event
 from .daemon import GenericDaemon
+from .filesystem import parse_fstab, parse_mount
 
 class Mounter(Thread):
     def run(self):
         while True:
             sleep(10)
+
+def get_mounts(config):
+
+    # Get all configured visiable mount points
+    cfg = [m for m in config['mounts'] if not m['hidden']]
+
+    # Get all fstab defined ecryptfs file systems and filter if force
+    # options are set
+    dfd = [m for m in parse_fstab() if m['type'] == 'ecryptfs']
+    fopts = set(config['force-options'])
+    if fopts:
+        dfd = [d for d in dfd if set(d['options']) >= fopts]
+    dfd = [d['mp'] for d in dfd]
+
+    # Get currently mounted ecryptfs file systems
+    mtd = [m['mp'] for m in parse_mount() if m['type'] == 'ecryptfs']
+
+    # Now we want:
+    #     Configured, visible, defined, well defined, with mount
+    #     status, list of mount points.
+    mounts = []
+    for c in cfg:
+        if c['mp'] not in dfd:
+            continue
+        m = {
+            'name'   : c['name'],
+            'mp'     : c['mp'],
+            'mounted': c['mp'] in mtd
+        }
+        mounts.append(m)
+
+    return mounts
 
 
 class MountPoint(object):
@@ -33,16 +66,15 @@ class MountPoint(object):
         self.mount_point = mount_point
         self.publish = publish
 
-        self.timestamp =
-        self.watch_manager =
+        #self.timestamp =
+        #self.watch_manager =
 
 
 class Umounter(Thread):
 
     def __init__(self, event, ):
         self.event = event
-        self.
-
+        #self.
 
     def run(self):
 
@@ -81,3 +113,7 @@ class MLUDaemon(GenericDaemon):
         self.u_event.set()
         self.u.join(1.0)
 
+
+if __name__ == '__main__':
+    from pprint import pprint
+    pprint(get_mounts())
