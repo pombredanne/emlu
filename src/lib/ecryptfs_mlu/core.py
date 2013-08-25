@@ -18,13 +18,12 @@
 from gi.repository import Gio, GObject
 from .daemon import GenericDaemon
 from .dbus import DBusService, dbus_method
-from .mount import get_mounts, mount, umount
 
 DBUS_WKN = 'org.ecryptfs.mlu.MLUDaemon'
 
 class MLUDaemon(GenericDaemon, DBusService):
 
-    def __init__(config):
+    def __init__(self, config):
         super(MLUDaemon, self).__init__(
                 config=config,
                 object_path='/'

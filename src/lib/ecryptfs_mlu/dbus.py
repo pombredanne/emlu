@@ -43,6 +43,7 @@ def dbus_method(dbus_interface, in_signature=None, out_signature=None):
 
     return decorator
 
+
 class DBusService(object):
 
     class _DBusInfo:
@@ -56,7 +57,7 @@ class DBusService(object):
 
         super(DBusService, self).__init__(**kwargs)
 
-        self.__dbus_info = GioDBusServiceObject._DBusInfo()
+        self.__dbus_info = DBusService._DBusInfo()
         self.__dbus_info.object_path = object_path
 
         # set up the vtable maps, for more efficient lookups at runtime

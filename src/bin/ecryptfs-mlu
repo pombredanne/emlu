@@ -21,9 +21,9 @@ from ecryptfs_mlu import *
 
 if __name__ == '__main__':
 
-    usage = 'Usage: ecryptfs-mlu [start|stop|restart]'
+    usage = 'Usage: {} [start|stop|restart|foreground]'.format(sys.argv[0])
     if len(sys.argv) < 2:
-        sys.stderr.write(usage)
+        sys.stderr.write(usage + '\n')
         sys.exit(1)
 
     config = read_config()
@@ -36,6 +36,8 @@ if __name__ == '__main__':
         dc.stop()
     elif param == 'restart':
         dc.restart()
+    elif param == 'foreground':
+        dc.foreground()
     else:
         sys.stderr.write('Unknown param "{}".'.format(param) + '\n')
         sys.exit(2)
