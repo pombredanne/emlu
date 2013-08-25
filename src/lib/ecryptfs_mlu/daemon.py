@@ -79,7 +79,7 @@ class GenericDaemon(object):
         """
 
         # Check working directory
-        if not os.path.isdir(self.workpath):
+        if not os.path.isdir(self.workdir):
             self._fatal('Working directory doesn\'t exist.', '')
 
         # Exit first parent process
@@ -92,7 +92,7 @@ class GenericDaemon(object):
 
         # Decouple from parent environment
         try:
-            os.chdir(self.workpath)
+            os.chdir(self.workdir)
         except OSError as err:
             self._fatal('Path change failed: {0}', err)
 
@@ -112,6 +112,7 @@ class GenericDaemon(object):
 
         # Write pidfile
         pid = str(os.getpid())
+        print('[{}]'.format(pid))
         with open(self.pidfile, 'w+') as f:
             f.write(pid + '\n')
 
@@ -120,7 +121,7 @@ class GenericDaemon(object):
         sys.stdout.close()
         sys.stderr.close()
         sys.stdin = file(self.stdin, 'r')
-        sys.stdout = file(self.stdout, 'a+')
+        sys.stdout = file(self.stdout, 'a+', 1)
         sys.stderr = file(self.stderr, 'a+', 0)
 
         # Register termination routine
@@ -192,7 +193,8 @@ class DaemonCtrl(object):
     This class allows to stop or start (spawn) a daemon class.
     """
     def __init__(self, daemoncls, config):
-        """Constructor.
+        """
+        Constructor.
 
         @param daemoncls: daemon class (not instance)
         @param pidfile: daemon pid file
@@ -200,6 +202,7 @@ class DaemonCtrl(object):
         """
         self.daemoncls = daemoncls
         self.config = config
+        self.pidfile = config['pidfile']
 
     def start(self):
         """
@@ -218,6 +221,9 @@ class DaemonCtrl(object):
                     "Daemon already running?\n"
             sys.stderr.write(message.format(self.pidfile))
             sys.exit(1)
+        else:
+            sys.stdout.write('Starting daemon... ')
+            sys.stdout.flush()
 
         # Start the daemon
         d = self.daemoncls(self.config)
@@ -240,10 +246,12 @@ class DaemonCtrl(object):
                     "Daemon not running?\n"
             sys.stderr.write(message.format(self.pidfile))
             return # Not an error in a restart
+        else:
+            print('Stopping daemon... [{}]'.format(pid))
 
         # Try killing the daemon process
         try:
-            while 1:
+            while True:
                 os.kill(pid, signal.SIGTERM)
                 time.sleep(0.1)
         except OSError as err:
@@ -268,5 +276,6 @@ class DaemonCtrl(object):
 
         Use this to test the daemon on a headed environment.
         """
+        print('Running daemon...')
         d = self.daemoncls(self.config)
         d._run()
