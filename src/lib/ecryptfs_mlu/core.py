@@ -15,65 +15,58 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from time import sleep
-from gi.repository import GObject
+from gi.repository import Gio, GObject
 from .daemon import GenericDaemon
-from .filesystem import parse_fstab, parse_mount
+from .dbus import DBusService, dbus_method
+from .mount import get_mounts, mount, umount
 
-def get_mounts(config):
+DBUS_WKN = 'org.ecryptfs.mlu.MLUDaemon'
 
-    # Get all configured visiable mount points
-    cfg = [m for m in config['mounts'] if not m['hidden']]
+class MLUDaemon(GenericDaemon, DBusService):
 
-    # Get all fstab defined ecryptfs file systems and filter if force
-    # options are set
-    dfd = [m for m in parse_fstab() if m['type'] == 'ecryptfs']
-    fopts = set(config['force-options'])
-    if fopts:
-        dfd = [d for d in dfd if set(d['options']) >= fopts]
-    dfd = [d['mp'] for d in dfd]
+    def __init__(config):
+        super(MLUDaemon, self).__init__(
+                config=config,
+                object_path='/'
+            )
 
-    # Get currently mounted ecryptfs file systems
-    mtd = [m['mp'] for m in parse_mount() if m['type'] == 'ecryptfs']
+        # Publish service
+        self.bus_id = Gio.bus_own_name(
+                Gio.BusType.SYSTEM,
+                DBUS_WKN,
+                Gio.BusNameOwnerFlags.NONE,
+                self._add_to_connection,
+                None,
+                None
+            )
 
-    # Now we want:
-    #     Configured, visible, defined, well defined, with mount
-    #     status, list of mount points.
-    mounts = []
-    for c in cfg:
-        if c['mp'] not in dfd:
-            continue
-        m = {
-            'name'   : c['name'],
-            'mp'     : c['mp'],
-            'mounted': c['mp'] in mtd
-        }
-        mounts.append(m)
+    #--- DBus methods ----------------------------------------------------------
+    @dbus_method(dbus_interface=DBUS_WKN + '.GetMounts',
+                 in_signature='', out_signature='s')
+    def get_mounts(self):
+        print('get_mounts()')
+        return 'here should be an encoded json'
 
-    return mounts
+    @dbus_method(dbus_interface=DBUS_WKN + '.Mount',
+                 in_signature='ss', out_signature='i')
+    def mount(self, mp, pwd):
+        print('mount({}, {})'.format(mp, pwd))
+        return 0
 
+    @dbus_method(dbus_interface=DBUS_WKN + '.Umount',
+                 in_signature='s', out_signature='i')
+    def umount(self, mp):
+        print('umount({})'.format(mp))
+        return 0
 
-class MountPoint(object):
-
-    def __init__(self, name, mount_point, publish):
-
-        self.name = name
-        self.mount_point = mount_point
-        self.publish = publish
-
-        #self.timestamp =
-        #self.watch_manager =
-
-class MLUDaemon(GenericDaemon):
-
+    #--- Daemon methods --------------------------------------------------------
     def loop(self):
-        GObject.MainLoop().run()
+        # Run GLib main loop
+        self.ml = GObject.MainLoop().run()
 
     def terminate(self):
-        pass
+        # Stop GLib main loop
+        self.ml.quit()
 
-
-if __name__ == '__main__':
-    from pprint import pprint
-    pprint(get_mounts())
-
+        # Unpublish service
+        Gio.bus_unown_name(self.bus_id)

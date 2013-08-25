@@ -42,7 +42,9 @@ class GenericDaemon(object):
     - 'stdout' : path to a file to use as std output. Default is os.devnull
     - 'stderr' : path to a file to use as std error. Default is os.devnull
     """
-    def __init__(self, config):
+    def __init__(self, config={}, **kwargs):
+
+        super(GenericDaemon, self).__init__(**kwargs)
 
         conf = {
             'pidfile'  : '/var/run/daemon.py.pid',
@@ -125,6 +127,12 @@ class GenericDaemon(object):
         signal.signal(signal.SIGTERM, self.__sigterm_handler)
 
         # Run daemon
+        self.__run()
+
+    def __run(self):
+        """
+        Run daemon.
+        """
         try:
             self.loop()
         except Exception as e:
@@ -156,9 +164,8 @@ class GenericDaemon(object):
         """
         Worker method.
 
-        It will be called after the process has been daemonized by start() or
-        restart(). You must override this method and provide that it never
-        returns.
+        It will be called after the process has been daemonized.
+        You must override this method and provide that it never returns.
         """
         while True:
             time.sleep(1)
@@ -182,7 +189,7 @@ class DaemonCtrl(object):
     >>> dc = DaemonCtrl(GenericDaemon, config)
     >>> dc.start()
 
-    This class allows to control (stop) or spawn (start) a daemon class.
+    This class allows to stop or start (spawn) a daemon class.
     """
     def __init__(self, daemoncls, config):
         """Constructor.
@@ -254,3 +261,12 @@ class DaemonCtrl(object):
         """
         self.stop()
         self.start()
+
+    def foreground(self):
+        """
+        Run the user loop on the foreground.
+
+        Use this to test the daemon on a headed environment.
+        """
+        d = self.daemon(self.config)
+        d.__run()

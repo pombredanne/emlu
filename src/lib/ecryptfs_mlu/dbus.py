@@ -16,19 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio, GLib, GObject
 import inspect
+from gi.repository import Gio, GLib, GObject
 
-class _Gio_DBusMethodInfo:
+class _Gio_DBusMethodInfo(object):
     interface = None
     in_args = None
     out_signature = None
 
-def Gio_bus_method(dbus_interface, in_signature=None, out_signature=None):
+def dbus_method(dbus_interface, in_signature=None, out_signature=None):
     def decorator(func):
         func._dbus_method = _Gio_DBusMethodInfo()
         func._dbus_method.interface = dbus_interface
-        #func._dbus_method.out_signature = '(' + (out_signature or '') + ')'
         func._dbus_method.out_signature = out_signature or ''
 
         func._dbus_method.in_args = []
@@ -44,7 +43,7 @@ def Gio_bus_method(dbus_interface, in_signature=None, out_signature=None):
 
     return decorator
 
-class GioDBusServiceObject(object):
+class DBusService(object):
 
     class _DBusInfo:
         object_path = None
@@ -53,7 +52,10 @@ class GioDBusServiceObject(object):
         methods = None # interface -> method_name -> info_map
                        # info_map keys: method_name, in_signature, out_signature
 
-    def __init__(self, object_path):
+    def __init__(self, object_path='/', **kwargs):
+
+        super(DBusService, self).__init__(**kwargs)
+
         self.__dbus_info = GioDBusServiceObject._DBusInfo()
         self.__dbus_info.object_path = object_path
 
@@ -67,7 +69,7 @@ class GioDBusServiceObject(object):
                     'out_signature': attr._dbus_method.out_signature,
                 }
 
-    def _add_to_connection(self, connection):
+    def _add_to_connection(self, connection, name=None):
         self.__dbus_info.connection = connection
         print 'add_to_connection', connection
 

@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Module for mount command and fstab file parsing.
+Module for mount commands wrappers and fstab file parsing.
 
 Note: This modules is Python 2.7 and 3.x compatible.
 """
@@ -135,6 +135,39 @@ def is_listed(mount_point):
         if l['mp'] == mount_point:
             return l
     return None
+
+
+def get_mounts(config):
+
+    # Get all configured visiable mount points
+    cfg = [m for m in config['mounts'] if not m['hidden']]
+
+    # Get all fstab defined ecryptfs file systems and filter if force
+    # options are set
+    dfd = [m for m in parse_fstab() if m['type'] == 'ecryptfs']
+    fopts = set(config['force-options'])
+    if fopts:
+        dfd = [d for d in dfd if set(d['options']) >= fopts]
+    dfd = [d['mp'] for d in dfd]
+
+    # Get currently mounted ecryptfs file systems
+    mtd = [m['mp'] for m in parse_mount() if m['type'] == 'ecryptfs']
+
+    # Now we want:
+    #     Configured, visible, defined, well defined, with mount
+    #     status, list of mount points.
+    mounts = []
+    for c in cfg:
+        if c['mp'] not in dfd:
+            continue
+        m = {
+            'name'   : c['name'],
+            'mp'     : c['mp'],
+            'mounted': c['mp'] in mtd
+        }
+        mounts.append(m)
+
+    return mounts
 
 
 # Test
