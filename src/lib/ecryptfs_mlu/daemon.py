@@ -20,7 +20,7 @@
 Generic daemon and control class for Python 2.7 and 3.x.
 """
 
-import sys, os, time, signal
+import sys, os, time, signal, traceback
 
 class GenericDaemon(object):
     """
@@ -60,7 +60,7 @@ class GenericDaemon(object):
         self.stdout  = conf['stdout']
         self.stderr  = conf['stderr']
 
-    def _fatal(self, msg, err):
+    def __fatal(self, msg, err):
         """
         Print error message and exit.
         """
@@ -78,7 +78,7 @@ class GenericDaemon(object):
 
         # Check working directory
         if not os.path.isdir(self.workpath):
-            self._fatal('Working directory doesn\'t exist.', '')
+            self.__fatal('Working directory doesn\'t exist.', '')
 
         # Exit first parent process
         try:
@@ -86,13 +86,13 @@ class GenericDaemon(object):
             if pid > 0:
                 sys.exit(0)
         except OSError as err:
-            self._fatal('Fork #1 failed: {0}', err)
+            self.__fatal('Fork #1 failed: {0}', err)
 
         # Decouple from parent environment
         try:
             os.chdir(self.workpath)
         except OSError as err:
-            self._fatal('Path change failed: {0}', err)
+            self.__fatal('Path change failed: {0}', err)
 
         # Run program in a new session
         os.setsid()
@@ -106,7 +106,7 @@ class GenericDaemon(object):
             if pid > 0:
                 sys.exit(0)
         except OSError as err:
-            self._fatal('Fork #2 failed: {0}', err)
+            self.__fatal('Fork #2 failed: {0}', err)
 
         # Write pidfile
         pid = str(os.getpid())
@@ -122,31 +122,34 @@ class GenericDaemon(object):
         sys.stderr = file(self.stderr, 'a+', 0)
 
         # Register termination routine
-        signal.signal(signal.SIGTERM, self._sigterm_handler)
+        signal.signal(signal.SIGTERM, self.__sigterm_handler)
 
         # Run daemon
         try:
             self.loop()
         except Exception as e:
             sys.stderr.write(traceback.format_exc())
-        finally:
-            self._on_exit(1)
+        self.__on_exit(1)
 
-    def _sigterm_handler(self, signum, frame):
+    def __sigterm_handler(self, signum, frame):
         """
         SIGTERM signal handler.
         """
-        self._on_exit(0)
+        self.__on_exit(0)
 
-    def _on_exit(self, status):
+    def __on_exit(self, status):
         """
         Daemon common termination routine.
         """
-        self.terminate()
+        try:
+            self.terminate()
+        except Exception as e:
+            sys.stderr.write(traceback.format_exc())
         sys.stdin.close()
         sys.stdout.close()
         sys.stderr.close()
-        os.remove(self.pidfile)
+        if os.path.exists(self.pidfile):
+            os.remove(self.pidfile)
         sys.exit(status)
 
     def loop(self):

@@ -44,7 +44,8 @@ def Gio_bus_method(dbus_interface, in_signature=None, out_signature=None):
 
     return decorator
 
-class GioDBusServiceObject:
+class GioDBusServiceObject(object):
+
     class _DBusInfo:
         object_path = None
         connection = None
