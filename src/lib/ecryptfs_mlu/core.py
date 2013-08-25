@@ -16,14 +16,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from time import sleep
-from threading import Thread, Event
+from gi.repository import GObject
 from .daemon import GenericDaemon
 from .filesystem import parse_fstab, parse_mount
-
-class Mounter(Thread):
-    def run(self):
-        while True:
-            sleep(10)
 
 def get_mounts(config):
 
@@ -69,51 +64,16 @@ class MountPoint(object):
         #self.timestamp =
         #self.watch_manager =
 
-
-class Umounter(Thread):
-
-    def __init__(self, event, ):
-        self.event = event
-        #self.
-
-    def run(self):
-
-        # Get list of mount points to watch (defined and already mounted)
-
-        # Loop
-        while True:
-            shutdown = self.event.wait(self.timeout)
-            if shutdown:
-                break
-
-        # Umount all mounts
-
-
 class MLUDaemon(GenericDaemon):
 
-    def init(self):
-
-        self.m_event = Event()
-        self.u_event = Event()
-
-        self.m = Mounter(self.m_event)
-        self.u = Umounter(self.u_event)
-
     def loop(self):
-
-        self.init()
-        while True:
-            sleep(10)
+        GObject.MainLoop().run()
 
     def terminate(self):
-
-        self.m_event.set()
-        self.m.join(1.0)
-
-        self.u_event.set()
-        self.u.join(1.0)
+        pass
 
 
 if __name__ == '__main__':
     from pprint import pprint
     pprint(get_mounts())
+

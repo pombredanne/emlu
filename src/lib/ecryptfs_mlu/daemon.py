@@ -122,12 +122,23 @@ class GenericDaemon(object):
         sys.stderr = file(self.stderr, 'a+', 0)
 
         # Register termination routine
-        signal.signal(signal.SIGTERM, self._on_exit)
+        signal.signal(signal.SIGTERM, self._sigterm_handler)
 
         # Run daemon
-        self.run()
+        try:
+            self.loop()
+        except Exception as e:
+            sys.stderr.write(traceback.format_exc())
+        finally:
+            self._on_exit(1)
 
-    def _on_exit(self, signum, frame):
+    def _sigterm_handler(self, signum, frame):
+        """
+        SIGTERM signal handler.
+        """
+        self._on_exit(0)
+
+    def _on_exit(self, status):
         """
         Daemon common termination routine.
         """
@@ -136,7 +147,7 @@ class GenericDaemon(object):
         sys.stdout.close()
         sys.stderr.close()
         os.remove(self.pidfile)
-        sys.exit(0)
+        sys.exit(status)
 
     def loop(self):
         """
