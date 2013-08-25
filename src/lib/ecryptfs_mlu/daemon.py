@@ -215,15 +215,22 @@ class DaemonCtrl(object):
         except IOError:
             pid = None
 
+        # Check if pid is still valid by querying /proc/{pid}/status on Linux
+        if pid and sys.platform.startswith('linux'):
+            proc_status = '/proc/{}/status'.format(pid)
+            if not os.path.exists(proc_status):
+                os.remove(self.pidfile)
+                pid = None
+                message = 'Removing dead pid file {}\n'
+                sys.stderr.write(message.format(self.pidfile))
+
         if pid:
-            # FIXME: Check on /proc/{pid}/status and remove PID file if necesarry
-            message = "pidfile {0} already exist. " + \
-                    "Daemon already running?\n"
+            message = 'pid file {0} already exist. Daemon already running.\n'
             sys.stderr.write(message.format(self.pidfile))
             sys.exit(1)
-        else:
-            sys.stdout.write('Starting daemon... ')
-            sys.stdout.flush()
+
+        sys.stdout.write('Starting daemon... ')
+        sys.stdout.flush()
 
         # Start the daemon
         d = self.daemoncls(self.config)
@@ -242,8 +249,7 @@ class DaemonCtrl(object):
             pid = None
 
         if not pid:
-            message = "pidfile {0} does not exist. " + \
-                    "Daemon not running?\n"
+            message = 'pid file {0} does not exist. Daemon not running.\n'
             sys.stderr.write(message.format(self.pidfile))
             return # Not an error in a restart
         else:
@@ -256,7 +262,7 @@ class DaemonCtrl(object):
                 time.sleep(0.1)
         except OSError as err:
             e = str(err.args)
-            if e.find("No such process") > 0:
+            if e.find('No such process') > 0:
                 if os.path.exists(self.pidfile):
                     os.remove(self.pidfile)
             else:
