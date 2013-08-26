@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 #
-# Copyright (C) 2009 Sander Marechal and contributors.
+# Copyright (C) 2009 Sander Marechal <s.marechal@jejik.com>
 # Copyright (C) 2013 Carlos Jenkins <carlos@jenkins.co.cr>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -261,12 +261,11 @@ class DaemonCtrl(object):
                 os.kill(pid, signal.SIGTERM)
                 time.sleep(0.1)
         except OSError as err:
-            e = str(err.args)
-            if e.find('No such process') > 0:
+            if err.errno == 3: # No such process
                 if os.path.exists(self.pidfile):
                     os.remove(self.pidfile)
             else:
-                print(str(err.args))
+                sys.stderr.write(str(err.args) + '\n')
                 sys.exit(1)
 
     def restart(self):

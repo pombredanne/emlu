@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import inspect
-from gi.repository import Gio, GLib, GObject
+from gi.repository import Gio, GLib
 
 class _Gio_DBusMethodInfo(object):
     interface = None

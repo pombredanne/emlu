@@ -14,3 +14,17 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+"""
+Test script for ecryptfs-mlu web client module.
+"""
+
+import sys
+sys.path.insert(0, '../src/lib')
+
+from bottle import run
+from ecryptfs_mlu.clients.web import *
+
+
+if __name__ == '__main__':
+    run(host='localhost', port=8080, debug=True)

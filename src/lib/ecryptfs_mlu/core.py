@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio, GObject
+from gi.repository import Gio, GLib
 from .daemon import GenericDaemon
 from .dbus import DBusService, dbus_method
 
@@ -61,7 +61,7 @@ class MLUDaemon(GenericDaemon, DBusService):
     #--- Daemon methods --------------------------------------------------------
     def loop(self):
         # Run GLib main loop
-        self.ml = GObject.MainLoop().run()
+        self.ml = GLib.MainLoop().run()
 
     def terminate(self):
         # Stop GLib main loop
