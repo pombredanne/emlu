@@ -16,14 +16,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Test script for ecryptfs-mlu web client module.
+Test script for emlu web client module.
 """
 
 import sys
 sys.path.insert(0, '../src/lib')
 
 from bottle import run
-from ecryptfs_mlu.clients.web import *
+from emlu.client.web import *
 
 
 if __name__ == '__main__':

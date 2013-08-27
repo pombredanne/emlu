@@ -1,11 +1,11 @@
-ecryptfs-mlu D-Bus interface
+emlu daemon D-Bus interface
 ============================
 
-The ecryptfs-mlu daemon expose the following interface on the D-Bus System bus:
+The emlu daemon expose the following interface on the D-Bus System bus:
 
-Object: 'org.ecryptfs.mlu'
-Object path: 'org/ecryptfs/mlu/MLUDaemon'
-Interface  : 'org.ecryptfs.mlu.MLUDaemon'
+Object     : 'org.emlu'
+Object path: 'org/emlu/Daemon'
+Interface  : 'org.emlu.Daemon'
 
 - GetMounts():
     Purpose    : Get a list of all the well configured and visible mount points.
@@ -19,13 +19,17 @@ Interface  : 'org.ecryptfs.mlu.MLUDaemon'
          ...
         ]
 
-- Mount(mp, pwd):
+- Mount(mp, pwd, timeout):
     Purpose    : Mount a configured mount point using given password.
     Parameters :
-        - mp : String
+        - mp     : String
               Mount point to mount (e.g. '/media/mymount1')
-        - pwd: String
+        - pwd    : String
               Password to use to mount the ecryptfs mount point.
+        - timeout: Integer
+              0 to disable auto-umount, 
+              < 0 to use default timeout (as in config file),
+              > 0 timeout in minutes.
     Return     : Integer
         0 success.
        -1 unkown mount point.

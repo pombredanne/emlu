@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-from ecryptfs_mlu import *
+from emlu import *
 
 if __name__ == '__main__':
 
@@ -27,7 +27,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     config = read_config()
-    dc = DaemonCtrl(MLUDaemon, config)
+    dc = DaemonCtrl(EMLUDaemon, config)
 
     param = sys.argv[1]
     if param == 'start':

@@ -26,9 +26,9 @@ from os.path import exists
 
 def read_config():
 
-    config = '/etc/ecryptfs-mlu.conf'
+    config = '/etc/emlu.conf'
     if not exists(config):
-        config = 'ecryptfs-mlu.conf'
+        config = 'emlu.conf'
 
     with open(config, 'r') as f:
         return json.loads(f.read())

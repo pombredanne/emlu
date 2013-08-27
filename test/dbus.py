@@ -16,16 +16,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Test script for ecryptfs-mlu dbus module.
+Test script for emlu dbus module.
 """
 
 import sys
 sys.path.insert(0, '../src/lib')
 
 from gi.repository import GLib
-from ecryptfs_mlu.dbus import dbus_method, DBusService
+from emlu.dbus import dbus_method, DBusService
 
-DBUS_WKN = 'org.ecryptfs.mlu.Test'
+DBUS_WKN = 'org.emlu.Test'
 
 class TestDBus(DBusService):
     def __init__(self):

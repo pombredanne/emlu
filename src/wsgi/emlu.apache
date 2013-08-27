@@ -1,0 +1,13 @@
+<VirtualHost *>
+    ServerName example.com
+
+    WSGIDaemonProcess emlu user=www-data group=www-data processes=1 threads=5
+    WSGIScriptAlias / /var/www/emlu/app.wsgi
+
+    <Directory /var/www/emlu>
+        WSGIProcessGroup emlu
+        WSGIApplicationGroup %{GLOBAL}
+        Order deny,allow
+        Allow from 192.168.1.0/24
+    </Directory>
+</VirtualHost>

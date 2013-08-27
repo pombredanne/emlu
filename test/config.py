@@ -24,8 +24,8 @@ import json
 
 config = {
         'timeout'      : 30,
-        'pid'          : '/var/run/ecryptfs-mlu.pid',
-        'log'          : '/var/log/ecryptfs-mlu.log',
+        'pid'          : '/var/run/emlu.pid',
+        'log'          : '/var/log/emlu.log',
         'samba-check'  : True,
         'force-options': ['user', 'noauto'],
         'mounts'       : [

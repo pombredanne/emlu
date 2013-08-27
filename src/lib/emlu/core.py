@@ -19,12 +19,12 @@ from gi.repository import Gio, GLib
 from .daemon import GenericDaemon
 from .dbus import DBusService, dbus_method
 
-DBUS_WKN = 'org.ecryptfs.mlu.MLUDaemon'
+DBUS_WKN = 'org.emlu.EMLUDaemon'
 
-class MLUDaemon(GenericDaemon, DBusService):
+class EMLUDaemon(GenericDaemon, DBusService):
 
     def __init__(self, config):
-        super(MLUDaemon, self).__init__(
+        super(EMLUDaemon, self).__init__(
                 config=config,
                 object_path='/'
             )

@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Test script for ecryptfs-mlu daemon module.
+Test script for emlu daemon module.
 """
 
 import sys
@@ -24,7 +24,7 @@ sys.path.insert(0, '../src/lib')
 
 import os
 from time import sleep
-from ecryptfs_mlu.daemon import GenericDaemon, DaemonCtrl
+from emlu.daemon import GenericDaemon, DaemonCtrl
 
 
 class TestDaemon(GenericDaemon):

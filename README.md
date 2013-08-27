@@ -1,5 +1,5 @@
-ecryptfs-mlu
-============
+EMLU
+====
 
 [ecryptfs] [] file system mounter, listener and umounter daemon.
 
@@ -11,6 +11,8 @@ Features
   - Mount ecryptfs password protected filesystems using D-Bus.
   - Automatically umount file systems after certain time of inactivity.
   - Optionally, check that file systems is not being used by Samba.
+  - Easy to use utility to setup an ecryptfs mount.
+  - Easy to use web (WSGI) and command line clients.
 
 
 Installation and setup
