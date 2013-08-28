@@ -27,17 +27,15 @@ Interface  : 'org.emlu.Daemon'
         - pwd    : String
               Password to use to mount the ecryptfs mount point.
         - timeout: Integer
-              0 to disable auto-umount, 
+              0 to disable auto-umount,
               < 0 to use default timeout (as in config file),
               > 0 timeout in minutes.
     Return     : Integer
         0 success.
        -1 unkown mount point.
        -2 already mounted.
-       -3 target point doesn't exists.
-       -4 mount point not defined in fstab.
-       -5 wrong options.
-       -6 mount error (wrong password?).
+       -3 target mount point doesn't exists.
+       -4 mount error (wrong password?).
 
 - Umount(mp):
     Purpose    : Umount a mount point.
@@ -48,4 +46,5 @@ Interface  : 'org.emlu.Daemon'
         0 success.
        -1 unkown mount point.
        -2 not mounted.
+       -3 umount error.
 

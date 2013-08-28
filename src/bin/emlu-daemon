@@ -17,7 +17,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-from emlu import *
+from emlu.config import read_config
+from emlu.daemon import DaemonCtrl
+from emlu.core import EMLUDaemon
+
 
 if __name__ == '__main__':
 

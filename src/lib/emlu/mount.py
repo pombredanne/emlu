@@ -21,6 +21,8 @@ Module for mount commands wrappers and fstab file parsing.
 Note: This modules is Python 2.7 and 3.x compatible.
 """
 
+import os
+import shlex
 import subprocess
 
 def parse_mount():
@@ -62,17 +64,6 @@ def parse_mount():
         entries.append(entry)
 
     return entries
-
-
-def is_mounted(mount_point):
-    """
-    Check if a particular mount point is already mounted.
-    """
-    mounted = parse_mount()
-    for m in mounted:
-        if m['mp'] == mount_point:
-            return m
-    return None
 
 
 def parse_fstab():
@@ -126,20 +117,9 @@ def parse_fstab():
     return entries
 
 
-def is_listed(mount_point):
-    """
-    Check if a particular mount point is listed in the fstab.
-    """
-    listed = parse_fstab()
-    for l in listed:
-        if l['mp'] == mount_point:
-            return l
-    return None
-
-
 def get_mounts(config):
 
-    # Get all configured visiable mount points
+    # Get all configured visible mount points
     cfg = [m for m in config['mounts'] if not m['hidden']]
 
     # Get all fstab defined ecryptfs file systems and filter if force
@@ -168,6 +148,85 @@ def get_mounts(config):
         mounts.append(m)
 
     return mounts
+
+
+def mount(mp, pwd):
+
+    mts = get_mounts()
+
+    # Check if valid mount point
+    md = None
+    for m in mts:
+        if m['mp'] == mp:
+            md = m
+            break
+    if not md:
+        return -1
+
+    # Check if mounted
+    if md['mounted']:
+        return -2
+
+    # Check mount point
+    if not os.path.exits(mp) or not os.path.isdir(mp):
+        return -3
+
+    # Execute mount cmd
+    in_fd, out_fd = os.pipe()
+
+    pss = 'passphrase_passwd={}'.format(pwd)
+    os.write(out_fd, pss)
+    os.close(out_fd)
+    del pss
+
+    cmd = 'mount {mp} -o key=passphrase:passphrase_passwd_fd={fd}'.format(
+            mp=mp,
+            fd=in_fd
+        )
+
+    ret_code = subprocess.call(shlex.split(cmd))
+    os.close(in_fd)
+
+    if ret_code != 0:
+        sys.stderr.write(
+            'Unable to mount \'{mp}\'. mount exit code {c}\n'.format(
+                mp=mp, c=ret_code
+            )
+        )
+        return -4
+
+    return 0
+
+
+def umount(mp):
+
+    mts = get_mounts()
+
+    # Check if valid mount point
+    md = None
+    for m in mts:
+        if m['mp'] == mp:
+            md = m
+            break
+    if not md:
+        return -1
+
+    # Check if mounted
+    if not md['mounted']:
+        return -2
+
+    # Execute umount cmd
+    cmd = 'umount {mp}'.format(mp=mp)
+    ret_code = subprocess.call(shlex.split(cmd))
+    if ret_code != 0:
+        sys.stderr.write(
+            'Unable to umount \'{mp}\'. umount exit code {c}\n'.format(
+                mp=mp, c=ret_code
+            )
+        )
+        return -3
+
+    return 0
 
 
 # Test

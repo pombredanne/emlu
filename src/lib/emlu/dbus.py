@@ -99,7 +99,9 @@ class DBusService(object):
         self.__dbus_info.connection = None
 
     def __dbus_introspection_xml(self):
-        '''Generate introspection XML'''
+        """
+        Generate introspection XML
+        """
 
         xml = '<node>\n'
 

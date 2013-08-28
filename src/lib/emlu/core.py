@@ -15,9 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import json
+
 from gi.repository import Gio, GLib
+
+from .mount import get_mounts, mount, umount
 from .daemon import GenericDaemon
 from .dbus import DBusService, dbus_method
+
 
 DBUS_WKN = 'org.emlu.EMLUDaemon'
 
@@ -44,19 +49,25 @@ class EMLUDaemon(GenericDaemon, DBusService):
                  in_signature='', out_signature='s')
     def get_mounts(self):
         print('get_mounts()')
-        return 'here should be an encoded json'
+        return json.dumps(get_mounts())
 
     @dbus_method(dbus_interface=DBUS_WKN + '.Mount',
                  in_signature='ss', out_signature='i')
-    def mount(self, mp, pwd):
-        print('mount({}, {})'.format(mp, pwd))
-        return 0
+    def mount(self, mp, pwd, timeout):
+        print('mount({}, ******)'.format(mp))
+        code = mount(mp, pwd)
+        if code == 0:
+            self.watch(mp, timeout)
+        return code
 
     @dbus_method(dbus_interface=DBUS_WKN + '.Umount',
                  in_signature='s', out_signature='i')
     def umount(self, mp):
         print('umount({})'.format(mp))
-        return 0
+        code = umount(mp)
+        if code == 0:
+            self.unwatch(mp)
+        return code
 
     #--- Daemon methods --------------------------------------------------------
     def loop(self):
@@ -69,3 +80,4 @@ class EMLUDaemon(GenericDaemon, DBusService):
 
         # Unpublish service
         Gio.bus_unown_name(self.bus_id)
+
