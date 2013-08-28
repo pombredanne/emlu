@@ -30,9 +30,10 @@ config = {
         'force-options': ['user', 'noauto'],
         'mounts'       : [
                 {
-                    'name'   : 'user1',
-                    'mp'  : '/media/mount1',
-                    'hidden': False,
+                    'name'    : 'user1',
+                    'mp'      : '/media/mount1',
+                    'hidden'  : False,
+                    'timeout' : -1,
                 }
             ],
     }
