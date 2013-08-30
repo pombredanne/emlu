@@ -179,7 +179,7 @@ def mount(mp, pwd):
     os.close(out_fd)
     del pss
 
-    cmd = 'mount {mp} -o key=passphrase:passphrase_passwd_fd={fd}'.format(
+    cmd = '/bin/mount {mp} -o key=passphrase:passphrase_passwd_fd={fd}'.format(
             mp=mp,
             fd=in_fd
         )
@@ -216,7 +216,7 @@ def umount(mp):
         return -2
 
     # Execute umount cmd
-    cmd = 'umount {mp}'.format(mp=mp)
+    cmd = '/bin/umount {mp}'.format(mp=mp)
     ret_code = subprocess.call(shlex.split(cmd))
     if ret_code != 0:
         sys.stderr.write(

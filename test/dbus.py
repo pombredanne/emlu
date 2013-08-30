@@ -22,68 +22,56 @@ Test script for emlu dbus module.
 import sys
 sys.path.insert(0, '../src/lib')
 
-from gi.repository import GLib
+import subprocess
+
+from gi.repository import Gio, GLib
 from emlu.dbus import dbus_method, DBusService
 
-DBUS_WKN = 'org.emlu.Test'
+DBUS_WKN = 'org.emlu.TestDBus'
 
 class TestDBus(DBusService):
     def __init__(self):
         super(TestDBus, self).__init__()
-        self.number = 10
-    @dbus_method(dbus_interface=DBUS_WKN + '.Hello',
-                 in_signature='s', out_signature='s')
+
+        self.bus_id = Gio.bus_own_name(
+            Gio.BusType.SESSION,
+            DBUS_WKN,
+            Gio.BusNameOwnerFlags.NONE,
+            self._add_to_connection,
+            None, None
+        )
+
+    @dbus_method(interface=DBUS_WKN + '.hello', in_sig='s', out_sig='s')
     def hello(self, message):
         if message == 'error':
             raise ValueError('Requested error')
         return 'Good day {}'.format(message)
 
 # These spawn a separate process for doing queries (cheesy hack), so our main
-# loop can keep runnin
+# loop can keep running
 def send_request(arg):
-    print '\n----- sending request hello("%s") -------' % arg
-    subprocess.Popen(['gdbus', 'call', '-e', '-d', 'de.piware.Demo', '-o', '/',
-        '-m', 'de.piware.Demo.Hello.hello', arg])
-    return False
-
-def send_property_get():
-    print '\n----- sending property get -------'
-    subprocess.Popen(['gdbus', 'call', '-e', '-d', 'de.piware.Demo', '-o', '/',
-        '-m', 'org.freedesktop.DBus.Properties.Get', 'de.piware.Demo.Hello', 'number'])
-    return False
-
-def send_property_set():
-    print '\n----- sending property set -------'
-    subprocess.Popen(['dbus-send', '--print-reply', '--dest=de.piware.Demo',
-            '/', 'org.freedesktop.DBus.Properties.Set',
-            'string:de.piware.Demo.Hello', 'string:number',
-            'variant:int32:99'])
+    print('\n----- sending request hello("{}") -------'.format(arg))
+    subprocess.call(
+            ['gdbus', 'call', '-e', '-d', DBUS_WKN,
+             '-o', '/', '-m', DBUS_WKN + '.hello', arg]
+        )
     return False
 
 
 if __name__ == '__main__':
 
-    service = PiwareDemo('/')
-
-    bus_id = Gio.bus_own_name(
-            Gio.BusType.SESSION,
-            'de.piware.Demo',
-            Gio.BusNameOwnerFlags.NONE,
-            service._add_to_connection,
-            None, None
-        )
-
-    # now send some requests to check the result
+    service = TestDBus()
     ml = GLib.MainLoop()
-    GLib.timeout_add(1000, send_request, 'Martin')
+
+    # Program some requests
+    GLib.timeout_add(1000, send_request, 'World')
     GLib.timeout_add(2000, send_request, 'error')
-    #GLib.timeout_add(3000, send_property_get)
-    #GLib.timeout_add(5000, send_property_set)
-    #GLib.timeout_add(6000, send_property_get)
+
+    # Program termination and run
     GLib.timeout_add(3000, ml.quit)
     ml.run()
 
-    print 'unowning bus name...'
-    Gio.bus_unown_name(bus_id)
+    print('Unowning bus name...')
+    Gio.bus_unown_name(service.bus_id)
     GLib.timeout_add(500, ml.quit)
     ml.run()

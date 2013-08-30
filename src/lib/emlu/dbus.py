@@ -19,26 +19,32 @@
 import inspect
 from gi.repository import Gio, GLib
 
-class _Gio_DBusMethodInfo(object):
-    interface = None
-    in_args = None
-    out_signature = None
 
-def dbus_method(dbus_interface, in_signature=None, out_signature=None):
-    def decorator(func):
-        func._dbus_method = _Gio_DBusMethodInfo()
-        func._dbus_method.interface = dbus_interface
-        func._dbus_method.out_signature = out_signature or ''
+class _DBusMethodInfo(object):
 
-        func._dbus_method.in_args = []
-        in_signature_list = GLib.Variant.split_signature(in_signature)
+    def __init__(self, func, interface, in_sig, out_sig):
+        self.interface = interface
+        self.in_args = []
+        self.in_sig = in_sig or ''
+        self.out_sig = out_sig or ''
+
+        in_sig_list = GLib.Variant.split_signature(self.in_sig)
         arg_names = inspect.getargspec(func).args
-        arg_names.pop(0) # eat "self" argument
-        if len(in_signature) != len(arg_names):
-            raise TypeError, 'specified signature %s for method %s does not match length of arguments' % (str(in_signature_list), func.func_name)
-        for pair in zip(in_signature_list, arg_names):
-            func._dbus_method.in_args.append(pair)
+        arg_names.pop(0) # Remove 'self' argument
+        if len(in_sig) != len(arg_names):
+            raise TypeError(
+                'Specified signature {} for method {} does not match '
+                'length of arguments'.format(
+                        str(in_signature_list), func.func_name
+                    )
+                )
+        for pair in zip(in_sig_list, arg_names):
+            self.in_args.append(pair)
 
+
+def dbus_method(interface, in_sig=None, out_sig=None):
+    def decorator(func):
+        func._dbus_method = _DBusMethodInfo(func, interface, in_sig, out_sig)
         return func
 
     return decorator
@@ -67,17 +73,17 @@ class DBusService(object):
             if hasattr(attr, '_dbus_method'):
                 self.__dbus_info.methods.setdefault(attr._dbus_method.interface, {})[id] = {
                     'in_args': attr._dbus_method.in_args,
-                    'out_signature': attr._dbus_method.out_signature,
+                    'out_signature': attr._dbus_method.out_sig,
                 }
 
     def _add_to_connection(self, connection, name=None):
         self.__dbus_info.connection = connection
         print 'add_to_connection', connection
 
-        vtable = Gio.DBusInterfaceVTable.new()
-        vtable.set_method_call(self.__dbus_method_call, None)
-        vtable.set_get_property(self.__dbus_get_property, None)
-        vtable.set_set_property(self.__dbus_set_property, None)
+        vtable = Gio.DBusInterfaceVTable()
+        vtable.method_call = self.__dbus_method_call
+        vtable.get_property = self.__dbus_get_property
+        vtable.set_property = self.__dbus_set_property
 
         node_info = Gio.DBusNodeInfo.new_for_xml(self.__dbus_introspection_xml())
         print '--- XML: ---\n%s\n-------' % node_info.generate_xml(4).str
@@ -103,25 +109,26 @@ class DBusService(object):
         Generate introspection XML
         """
 
-        xml = '<node>\n'
+        xml = ['<node>']
 
         for interface in self.__dbus_info.methods:
-            xml += '  <interface name="%s">\n' % interface
+            xml.append('  <interface name="{}">'.format(interface))
 
             for method, data in self.__dbus_info.methods[interface].items():
-                xml += '    <method name="%s">\n' % method
+                xml.append('    <method name="{}">'.format(method))
                 for (sig, name) in data['in_args']:
-                    xml += '      <arg type="%s" name="%s" direction="in"/>' % (sig, name)
-                xml += '      <arg type="%s" name="return" direction="out"/>' % data['out_signature']
-                xml += '    </method>\n'
+                    xml.append('      <arg type="{}" name="{}" direction="in"/>'.format(sig, name))
+                xml.append('      <arg type="{}" name="return" direction="out"/>'.format(data['out_signature']))
+                xml.append('    </method>')
 
-            xml += '  </interface>\n'
+            xml.append('  </interface>')
 
-        xml += '</node>\n'
-        return xml
+        xml.append('</node>')
 
-    def __dbus_method_call(self, conn, sender, object_path, iface_name, method_name,
-            parameters, invocation, user_data):
+        return '\n'.join(xml)
+
+    def __dbus_method_call(self, conn, sender, object_path, iface_name,
+                           method_name, parameters, invocation, user_data):
 
         print 'method call: %s %s.%s(%s)' % (object_path, iface_name, method_name, str(parameters))
 
@@ -145,14 +152,14 @@ class DBusService(object):
                     Gio.DBusError.IO_ERROR,
                     'Method %s.%s failed with: %s' % (iface_name, method_name, str(e)))
 
-    def __dbus_get_property(self, conn, sender, object_path, iface_name, prop_name,
-            error, user_data):
+    def __dbus_get_property(self, conn, sender, object_path, iface_name,
+                            prop_name, error, user_data):
         error = GLib.Error.new_literal(GLib.io_channel_error_quark(), 1,
                 'Not implemented yet')
         return None
 
-    def __dbus_set_property(self, conn, sender, object_path, iface_name, prop_name,
-            value, error, user_data):
+    def __dbus_set_property(self, conn, sender, object_path, iface_name,
+                            prop_name, value, error, user_data):
         error = GLib.Error.new_literal(GLib.io_channel_error_quark(), 1,
                 'Not implemented yet')
         return False
