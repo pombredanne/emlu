@@ -20,58 +20,50 @@ Test script for emlu dbus module.
 """
 
 import sys
-sys.path.insert(0, '../src/lib')
+sys.path = ['../src/lib'] + sys.path[1:]
 
 import subprocess
+import glib
+import dbus
 
-from gi.repository import Gio, GLib
-from emlu.dbus import dbus_method, DBusService
+from emlu.service import dbus_method, DBusService
 
-DBUS_WKN = 'org.emlu.TestDBus'
 
 class TestDBus(DBusService):
+
     def __init__(self):
-        super(TestDBus, self).__init__()
 
-        self.bus_id = Gio.bus_own_name(
-            Gio.BusType.SESSION,
-            DBUS_WKN,
-            Gio.BusNameOwnerFlags.NONE,
-            self._add_to_connection,
-            None, None
-        )
+        domain = 'org.emlu'
+        #bus = dbus.SystemBus()
+        bus = dbus.SessionBus()
+        super(TestDBus, self).__init__(bus, domain)
 
-    @dbus_method(interface=DBUS_WKN + '.hello', in_sig='s', out_sig='s')
+    @dbus_method(in_sig='s', out_sig='s')
     def hello(self, message):
         if message == 'error':
             raise ValueError('Requested error')
         return 'Good day {}'.format(message)
 
-# These spawn a separate process for doing queries (cheesy hack), so our main
-# loop can keep running
-def send_request(arg):
-    print('\n----- sending request hello("{}") -------'.format(arg))
-    subprocess.call(
-            ['gdbus', 'call', '-e', '-d', DBUS_WKN,
-             '-o', '/', '-m', DBUS_WKN + '.hello', arg]
-        )
-    return False
-
 
 if __name__ == '__main__':
 
     service = TestDBus()
-    ml = GLib.MainLoop()
+
+    def send_request(arg):
+        print('\n----- sending request hello("{}") -------'.format(arg))
+        subprocess.call(
+                ['gdbus', 'call', '-e', '-d', service.dbus_name,
+                 '-o', '/', '-m', '{}.{}'.format(service.dbus_name, 'hello'), arg]
+            )
+        return False
+
+
+    ml = glib.MainLoop()
 
     # Program some requests
-    GLib.timeout_add(1000, send_request, 'World')
-    GLib.timeout_add(2000, send_request, 'error')
+    glib.timeout_add(1000, send_request, 'World')
+    glib.timeout_add(2000, send_request, 'error')
 
     # Program termination and run
-    GLib.timeout_add(3000, ml.quit)
-    ml.run()
-
-    print('Unowning bus name...')
-    Gio.bus_unown_name(service.bus_id)
-    GLib.timeout_add(500, ml.quit)
+    glib.timeout_add(3000, ml.quit)
     ml.run()
