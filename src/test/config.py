@@ -23,7 +23,7 @@ import sys
 sys.path.insert(0, '../src/lib')
 
 import json
-from emlu.core import default_config
+from emlu.config import default_config
 
 
 config = default_config.copy()

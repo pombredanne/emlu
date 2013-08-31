@@ -19,72 +19,54 @@ import json
 
 from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer
 
-from .mount import get_mounts, mount, umount
+import .mount as mm
+from .config import default_conf
 from .daemon import GenericDaemon
-
-
-default_conf = {
-        # Server
-        'addr'         : 'locahost',
-        'port'         : 6464,
-        'prefork'      : False,
-        # Core
-        'timeout'      : 30,
-        'samba-check'  : True,
-        # Daemon
-        'pid'          : '/var/run/emlu.pid',
-        'log'          : '/var/log/emlu.log',
-        # Mounts
-        'force-options': ['user', 'noauto'],
-        'mounts'       : [],
-    }
-
-
-def exposed(fn):
-    server.register_function(fn)
-    return fn
 
 
 class EMLUDaemon(GenericDaemon):
 
     def __init__(self, config):
+
+        # Handle config dict
+        conf = default_conf.copy()
+        conf.update(config)
+        conf['stdout'] = conf['log']
+        conf['stderr'] = conf['log']
+
         super(EMLUDaemon, self).__init__(config)
 
-        conf = {
-            'addr'     : 'localhost',
-            'port'     : 6464,
-            'stdin'    : os.devnull,
-            'stdout'   : os.devnull,
-            'stderr'   : os.devnull,
-        }
-        conf.update(config)
-
         self.server = SimpleJSONRPCServer((self.addr, self.port))
+        self.server.register_function(self.get_mounts)
+        self.server.register_function(self.mount)
+        self.server.register_function(self.umount)
+
+    def watch(self, mp, timeout):
+        # FIXME Implement
+        pass
 
     #--- Exposed methods -------------------------------------------------------
-    @exposed
     def get_mounts(self):
         print('get_mounts()')
-        return json.dumps(get_mounts())
+        return json.dumps(mm.get_mounts())
 
-    @exposed
     def mount(self, mp, pwd, timeout):
         print('mount({}, ******)'.format(mp))
-        code = mount(mp, pwd)
+        code = mm.mount(mp, pwd)
         if code == 0:
             self.watch(mp, timeout)
         return code
 
-    @exposed
     def umount(self, mp):
         print('umount({})'.format(mp))
-        code = umount(mp)
+        code = mm.umount(mp)
         if code == 0:
             self.unwatch(mp)
         return code
 
     #--- Daemon methods --------------------------------------------------------
     def loop(self):
+        print('Starting EMLU server at {}:{}'.format(self.addr, self.port))
         server.serve_forever()
 
     def terminate(self):

@@ -56,11 +56,7 @@ class GenericDaemon(object):
         conf.update(config)
         self.config = conf
 
-        self.pidfile = conf['pidfile']
-        self.workdir = conf['workdir']
-        self.stdin   = conf['stdin']
-        self.stdout  = conf['stdout']
-        self.stderr  = conf['stderr']
+        self.__dict__.update(conf)
 
     def _fatal(self, msg, err):
         """

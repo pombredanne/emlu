@@ -25,14 +25,42 @@ import json
 from os.path import exists
 
 
+config_file = '/etc/emlu.conf'
+
+default_conf = {
+        # Server
+        'addr'         : 'locahost',
+        'port'         : 6464,
+        'prefork'      : False,
+        # Core
+        'timeout'      : 30,
+        'samba-check'  : True,
+        # Daemon
+        'pid'          : '/var/run/emlu.pid',
+        'log'          : '/var/log/emlu.log',
+        # Mounts
+        'force-options': ['user', 'noauto'],
+        'mounts'       : [],
+    }
+
+
 def read_config():
 
-    config = '/etc/emlu.conf'
-    if not exists(config):
-        config = 'emlu.conf'
+    conf = default_conf.copy()
 
-    with open(config, 'r') as f:
-        return json.loads(f.read())
+    with open(config_file, 'r') as f:
+        conf.update(json.loads(f.read()))
+
+    return conf
+
+
+def write_config(new_conf={}):
+
+    conf = default_conf.copy()
+    conf.update(new_conf)
+
+    with open(config_file, 'w') as f:
+        f.write(json.dumps(conf, indent=4))
 
 
 # Test

@@ -119,6 +119,9 @@ def parse_fstab():
 
 
 def get_mounts(config):
+    """
+    Get a list of valid mount points for EMLU.
+    """
 
     # Get all configured visible mount points
     cfg = [m for m in config['mounts'] if not m['hidden']]
@@ -152,6 +155,11 @@ def get_mounts(config):
 
 
 def mount(mp, pwd):
+    """
+    mount system command wrapper for EMLU.
+
+    Nota that this function check for valid mount points only.
+    """
 
     mts = get_mounts()
 
@@ -200,6 +208,11 @@ def mount(mp, pwd):
 
 
 def umount(mp):
+    """
+    umount system command wrapper for EMLU.
+
+    Nota that this function check for valid mount points only.
+    """
 
     mts = get_mounts()
 
