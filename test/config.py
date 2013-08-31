@@ -19,24 +19,24 @@
 Test script to generate a config file.
 """
 
+import sys
+sys.path.insert(0, '../src/lib')
+
 import json
+from emlu.core import default_config
 
 
-config = {
-        'timeout'      : 30,
-        'pid'          : '/var/run/emlu.pid',
-        'log'          : '/var/log/emlu.log',
-        'samba-check'  : True,
-        'force-options': ['user', 'noauto'],
-        'mounts'       : [
-                {
-                    'name'    : 'user1',
-                    'mp'      : '/media/mount1',
-                    'hidden'  : False,
-                    'timeout' : -1,
-                }
-            ],
-    }
+config = default_config.copy()
+
+# Append example mount
+config['mounts'].append(
+        {
+            'name'    : 'user1',
+            'mp'      : '/media/mount1',
+            'hidden'  : False,
+            'timeout' : -1,
+        }
+    )
 
 if __name__ == '__main__':
     print(json.dumps(config, indent=4))

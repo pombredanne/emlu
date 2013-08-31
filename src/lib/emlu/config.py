@@ -24,6 +24,7 @@ Note: This modules is Python 2.7 and 3.x compatible.
 import json
 from os.path import exists
 
+
 def read_config():
 
     config = '/etc/emlu.conf'

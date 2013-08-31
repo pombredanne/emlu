@@ -18,7 +18,8 @@ Features
 Installation and setup
 ----------------------
 
-FIXME
+    sudo pip install jsonrpclib
+
 
 License
 -------

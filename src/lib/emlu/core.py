@@ -17,42 +17,57 @@
 
 import json
 
-from gi.repository import Gio, GLib
+from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer
 
 from .mount import get_mounts, mount, umount
 from .daemon import GenericDaemon
-from .dbus import DBusService, dbus_method
 
 
-DBUS_WKN = 'org.emlu.EMLUDaemon'
+default_conf = {
+        # Server
+        'addr'         : 'locahost',
+        'port'         : 6464,
+        'prefork'      : False,
+        # Core
+        'timeout'      : 30,
+        'samba-check'  : True,
+        # Daemon
+        'pid'          : '/var/run/emlu.pid',
+        'log'          : '/var/log/emlu.log',
+        # Mounts
+        'force-options': ['user', 'noauto'],
+        'mounts'       : [],
+    }
 
-class EMLUDaemon(GenericDaemon, DBusService):
+
+def exposed(fn):
+    server.register_function(fn)
+    return fn
+
+
+class EMLUDaemon(GenericDaemon):
 
     def __init__(self, config):
-        super(EMLUDaemon, self).__init__(
-                config=config,
-                object_path='/'
-            )
+        super(EMLUDaemon, self).__init__(config)
 
-        # Publish service
-        self.bus_id = Gio.bus_own_name(
-                Gio.BusType.SYSTEM,
-                DBUS_WKN,
-                Gio.BusNameOwnerFlags.NONE,
-                self._add_to_connection,
-                None,
-                None
-            )
+        conf = {
+            'addr'     : 'localhost',
+            'port'     : 6464,
+            'stdin'    : os.devnull,
+            'stdout'   : os.devnull,
+            'stderr'   : os.devnull,
+        }
+        conf.update(config)
 
-    #--- DBus methods ----------------------------------------------------------
-    @dbus_method(dbus_interface=DBUS_WKN + '.GetMounts',
-                 in_signature='', out_signature='s')
+        self.server = SimpleJSONRPCServer((self.addr, self.port))
+
+    #--- Exposed methods -------------------------------------------------------
+    @exposed
     def get_mounts(self):
         print('get_mounts()')
         return json.dumps(get_mounts())
 
-    @dbus_method(dbus_interface=DBUS_WKN + '.Mount',
-                 in_signature='ss', out_signature='i')
+    @exposed
     def mount(self, mp, pwd, timeout):
         print('mount({}, ******)'.format(mp))
         code = mount(mp, pwd)
@@ -60,8 +75,7 @@ class EMLUDaemon(GenericDaemon, DBusService):
             self.watch(mp, timeout)
         return code
 
-    @dbus_method(dbus_interface=DBUS_WKN + '.Umount',
-                 in_signature='s', out_signature='i')
+    @exposed
     def umount(self, mp):
         print('umount({})'.format(mp))
         code = umount(mp)
@@ -71,13 +85,7 @@ class EMLUDaemon(GenericDaemon, DBusService):
 
     #--- Daemon methods --------------------------------------------------------
     def loop(self):
-        # Run GLib main loop
-        self.ml = GLib.MainLoop().run()
+        server.serve_forever()
 
     def terminate(self):
-        # Stop GLib main loop
-        self.ml.quit()
-
-        # Unpublish service
-        Gio.bus_unown_name(self.bus_id)
-
+        pass
