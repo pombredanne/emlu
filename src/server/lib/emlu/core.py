@@ -15,11 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+EMLU core module.
+"""
+
 import json
 
 from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer
 
-from .mount import get_mounts, mount, umount
+from .mount import get_mounts as _get_mounts
+from .mount import mount as _mount
+from .mount import umount as _umount
+
 from .config import default_conf
 from .daemon import GenericDaemon
 
@@ -37,29 +44,29 @@ class EMLUDaemon(GenericDaemon):
         super(EMLUDaemon, self).__init__(config)
 
         self.server = SimpleJSONRPCServer((self.addr, self.port))
-        self.server.register_function(self.ex_get_mounts)
-        self.server.register_function(self.ex_mount)
-        self.server.register_function(self.ex_umount)
+        self.server.register_function(self.get_mounts)
+        self.server.register_function(self.mount)
+        self.server.register_function(self.umount)
 
     def watch(self, mp, timeout):
         # FIXME Implement
         pass
 
     #--- Exposed methods -------------------------------------------------------
-    def ex_get_mounts(self):
+    def get_mounts(self):
         print('get_mounts()')
-        return json.dumps(get_mounts())
+        return json.dumps(_get_mounts())
 
-    def ex_mount(self, mp, pwd, timeout):
+    def mount(self, mp, pwd, timeout):
         print('mount({}, ******)'.format(mp))
-        code = mount(mp, pwd)
+        code = _mount(mp, pwd)
         if code == 0:
             self.watch(mp, timeout)
         return code
 
-    def ex_umount(self, mp):
+    def umount(self, mp):
         print('umount({})'.format(mp))
-        code = umount(mp)
+        code = _umount(mp)
         if code == 0:
             self.unwatch(mp)
         return code

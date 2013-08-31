@@ -17,10 +17,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Generic daemon and control class for Python 2.7 and 3.x.
+Generic daemon and control class.
 """
+# Note: This modules is Python 2.7 and 3.x compatible.
 
-import sys, os, time, signal, traceback
+import sys
+import os
+import time
+import signal
+import traceback
+
 
 class GenericDaemon(object):
     """

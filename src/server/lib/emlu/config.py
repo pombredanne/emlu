@@ -17,9 +17,8 @@
 
 """
 Module for reading a JSON formatted configuration file.
-
-Note: This modules is Python 2.7 and 3.x compatible.
 """
+# Note: This modules is Python 2.7 and 3.x compatible.
 
 import sys
 import json
@@ -45,6 +44,9 @@ default_conf = {
 
 
 def read_config():
+    """
+    Read EMLU configuration file.
+    """
 
     conf = default_conf.copy()
 
@@ -60,6 +62,9 @@ def read_config():
 
 
 def write_config(new_conf={}, filename=None):
+    """
+    Write EMLU configuration file.
+    """
 
     if not filename:
         filename = config_file
@@ -69,9 +74,3 @@ def write_config(new_conf={}, filename=None):
 
     with open(filename, 'w') as f:
         f.write(json.dumps(conf, indent=4))
-
-
-# Test
-if __name__ == '__main__':
-    from pprint import pprint
-    pprint(read_config())

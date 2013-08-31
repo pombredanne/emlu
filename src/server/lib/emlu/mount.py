@@ -17,9 +17,8 @@
 
 """
 Module for mount commands wrappers and fstab file parsing.
-
-Note: This modules is Python 2.7 and 3.x compatible.
 """
+# Note: This modules is Python 2.7 and 3.x compatible.
 
 import os
 import shlex
@@ -27,10 +26,9 @@ import subprocess
 
 
 def parse_mount():
-
     """
     Parse the output of the 'mount' command returning a list of dictionaries of
-    the type:
+    the form:
 
     [   {   'file_system': 'proc',
             'mp' : '/proc',
@@ -68,7 +66,6 @@ def parse_mount():
 
 
 def parse_fstab():
-
     """
     Parse the fstab file returning a list of dictionaries of the type:
 
@@ -120,7 +117,13 @@ def parse_fstab():
 
 def get_mounts(config):
     """
-    Get a list of valid mount points for EMLU.
+    Get EMLU valid mount points returning a list of the form:
+
+    [   {   'name'   : 'MyMount',
+            'mp'     : '/media/mymount1',
+            'mounted': True
+        ...
+    ]
     """
 
     # Get all configured visible mount points
@@ -241,16 +244,3 @@ def umount(mp):
         return -3
 
     return 0
-
-
-# Test
-if __name__ == '__main__':
-    from pprint import pprint
-    print('################ parse_mount() ################')
-    pprint(parse_mount(), indent=4)
-    print('################ is_mounted() ################')
-    print('is_mounted(\'/proc\') : {}'.format(is_mounted('/proc')))
-    print('################ parse_fstab() ################')
-    pprint(parse_fstab(), indent=4)
-    print('################ is_listed() ################')
-    print('is_listed(\'/proc\') : {}'.format(is_listed('/proc')))

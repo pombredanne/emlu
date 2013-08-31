@@ -18,14 +18,18 @@
 """
 Test script for emlu web client module.
 """
-# FIXME : Make it work.
 
 import sys
-sys.path.insert(0, '../clients/wsgi/')
+sys.path.insert(0, '../server/lib/')
 
-from bottle import run
-from app import *
+from pprint import pprint
+
+from emlu.mount import *
 
 
 if __name__ == '__main__':
-    run(host='localhost', port=8080, debug=True)
+    print('################ parse_mount() ################')
+    pprint(parse_mount(), indent=4)
+    print('################ parse_fstab() ################')
+    pprint(parse_fstab(), indent=4)
+

@@ -53,7 +53,5 @@ main_template = '''\
 @view('main.tpl')
 def root():
 
-    #bus = Gio.bus_get_sync(Gio.BusType.SYSTEM, None)
-
     return {}
 

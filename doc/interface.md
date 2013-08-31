@@ -1,13 +1,9 @@
-emlu daemon D-Bus interface
-============================
+EMLU daemon JSON-RPC interface
+==============================
 
-The emlu daemon expose the following interface on the D-Bus System bus:
+The EMLU daemon expose the following interface:
 
-Object     : 'org.emlu'
-Object path: 'org/emlu/Daemon'
-Interface  : 'org.emlu.Daemon'
-
-- GetMounts():
+- get_mounts():
     Purpose    : Get a list of all the well configured and visible mount points.
     Parameters : None.
     Return     : String (JSON).
@@ -19,7 +15,7 @@ Interface  : 'org.emlu.Daemon'
          ...
         ]
 
-- Mount(mp, pwd, timeout):
+- mount(mp, pwd, timeout):
     Purpose    : Mount a configured mount point using given password.
     Parameters :
         - mp     : String
@@ -37,7 +33,7 @@ Interface  : 'org.emlu.Daemon'
        -3 target mount point doesn't exists.
        -4 mount error (wrong password?).
 
-- Umount(mp):
+- umount(mp):
     Purpose    : Umount a mount point.
     Parameters :
         - mp : String
@@ -47,4 +43,3 @@ Interface  : 'org.emlu.Daemon'
        -1 unkown mount point.
        -2 not mounted.
        -3 umount error.
-
