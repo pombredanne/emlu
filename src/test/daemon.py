@@ -20,7 +20,7 @@ Test script for emlu daemon module.
 """
 
 import sys
-sys.path.insert(0, '../src/lib')
+sys.path.insert(0, '../server/lib')
 
 import os
 from time import sleep

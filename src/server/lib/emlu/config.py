@@ -21,22 +21,22 @@ Module for reading a JSON formatted configuration file.
 Note: This modules is Python 2.7 and 3.x compatible.
 """
 
+import sys
 import json
-from os.path import exists
 
 
 config_file = '/etc/emlu.conf'
 
 default_conf = {
         # Server
-        'addr'         : 'locahost',
+        'addr'         : 'localhost',
         'port'         : 6464,
         'prefork'      : False,
         # Core
         'timeout'      : 30,
         'samba-check'  : True,
         # Daemon
-        'pid'          : '/var/run/emlu.pid',
+        'pidfile'      : '/var/run/emlu.pid',
         'log'          : '/var/log/emlu.log',
         # Mounts
         'force-options': ['user', 'noauto'],
@@ -48,18 +48,26 @@ def read_config():
 
     conf = default_conf.copy()
 
-    with open(config_file, 'r') as f:
-        conf.update(json.loads(f.read()))
+    try:
+        with open(config_file, 'r') as f:
+            conf.update(json.loads(f.read()))
+    except Exception as e:
+        sys.stderr.write(str(e) + '\n')
+        sys.stderr.write('Error loading config file. '
+                         'Starting using default values.' + '\n')
 
     return conf
 
 
-def write_config(new_conf={}):
+def write_config(new_conf={}, filename=None):
+
+    if not filename:
+        filename = config_file
 
     conf = default_conf.copy()
     conf.update(new_conf)
 
-    with open(config_file, 'w') as f:
+    with open(filename, 'w') as f:
         f.write(json.dumps(conf, indent=4))
 
 

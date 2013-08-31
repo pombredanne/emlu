@@ -20,23 +20,24 @@ Test script to generate a config file.
 """
 
 import sys
-sys.path.insert(0, '../src/lib')
+sys.path.insert(0, '../server/lib')
 
 import json
-from emlu.config import default_config
+from emlu.config import default_conf
 
-
-config = default_config.copy()
-
-# Append example mount
-config['mounts'].append(
-        {
-            'name'    : 'user1',
-            'mp'      : '/media/mount1',
-            'hidden'  : False,
-            'timeout' : -1,
-        }
-    )
 
 if __name__ == '__main__':
+
+    config = default_conf.copy()
+
+    # Append example mount
+    config['mounts'].append(
+            {
+                'name'    : 'user1',
+                'mp'      : '/media/mount1',
+                'hidden'  : False,
+                'timeout' : -1,
+            }
+        )
+
     print(json.dumps(config, indent=4))

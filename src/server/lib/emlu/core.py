@@ -19,7 +19,7 @@ import json
 
 from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer
 
-import .mount as mm
+from .mount import get_mounts, mount, umount
 from .config import default_conf
 from .daemon import GenericDaemon
 
@@ -37,29 +37,29 @@ class EMLUDaemon(GenericDaemon):
         super(EMLUDaemon, self).__init__(config)
 
         self.server = SimpleJSONRPCServer((self.addr, self.port))
-        self.server.register_function(self.get_mounts)
-        self.server.register_function(self.mount)
-        self.server.register_function(self.umount)
+        self.server.register_function(self.ex_get_mounts)
+        self.server.register_function(self.ex_mount)
+        self.server.register_function(self.ex_umount)
 
     def watch(self, mp, timeout):
         # FIXME Implement
         pass
 
     #--- Exposed methods -------------------------------------------------------
-    def get_mounts(self):
+    def ex_get_mounts(self):
         print('get_mounts()')
-        return json.dumps(mm.get_mounts())
+        return json.dumps(get_mounts())
 
-    def mount(self, mp, pwd, timeout):
+    def ex_mount(self, mp, pwd, timeout):
         print('mount({}, ******)'.format(mp))
-        code = mm.mount(mp, pwd)
+        code = mount(mp, pwd)
         if code == 0:
             self.watch(mp, timeout)
         return code
 
-    def umount(self, mp):
+    def ex_umount(self, mp):
         print('umount({})'.format(mp))
-        code = mm.umount(mp)
+        code = umount(mp)
         if code == 0:
             self.unwatch(mp)
         return code
@@ -67,7 +67,7 @@ class EMLUDaemon(GenericDaemon):
     #--- Daemon methods --------------------------------------------------------
     def loop(self):
         print('Starting EMLU server at {}:{}'.format(self.addr, self.port))
-        server.serve_forever()
+        self.server.serve_forever()
 
     def terminate(self):
         pass
