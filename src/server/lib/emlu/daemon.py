@@ -21,8 +21,8 @@ Generic daemon and control class.
 """
 # Note: This modules is Python 2.7 and 3.x compatible.
 
-import sys
 import os
+import sys
 import time
 import signal
 import traceback
@@ -87,8 +87,9 @@ class GenericDaemon(object):
         # Exit first parent process
         try:
             pid = os.fork()
+            # If parent, return to continue processing
             if pid > 0:
-                sys.exit(0)
+                return
         except OSError as err:
             self._fatal('Fork #1 failed: {0}', err)
 
@@ -104,11 +105,11 @@ class GenericDaemon(object):
         # Set the new numeric mask
         os.umask(0)
 
-        # Exit from second parent
+        # Exit from second parent (first child)
         try:
             pid = os.fork()
             if pid > 0:
-                sys.exit(0)
+                os._exit(0)
         except OSError as err:
             self._fatal('Fork #2 failed: {0}', err)
 
