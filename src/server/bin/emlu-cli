@@ -17,9 +17,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
+Command line client for EMLU.
 """
 
 import argparse
+
+#from emlu.client import *
 
 
 def parse_cmd():
@@ -58,4 +61,6 @@ def parse_cmd():
 
 if __name__ == '__main__':
     args = parse_cmd()
+
     print(args)
+
