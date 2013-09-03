@@ -32,13 +32,6 @@ from .config import default_conf
 from .daemon import GenericDaemon
 
 
-class MountPoint():
-
-    def __init__(self, mp, name, timeout):
-        self.mp = mp
-        self.timeout = timeout
-
-
 class EMLUDaemon(GenericDaemon):
 
     def __init__(self, config):
@@ -57,9 +50,15 @@ class EMLUDaemon(GenericDaemon):
         self.server.register_function(self.mount)
         self.server.register_function(self.umount)
 
+        # Create thread pool
         self.pool = []
         for i in range(conf['pool']):
-            self.pool.append(Thread(target=self.server.serve_forever))
+            th = Thread(target=self.server.serve_forever)
+            self.pool.append(th)
+
+        # Create watcher thread
+        # FIXME: Implement
+        self.watcher = EMLUWatcher()
 
     #--- Exposed methods -------------------------------------------------------
     def get_mounts(self):
