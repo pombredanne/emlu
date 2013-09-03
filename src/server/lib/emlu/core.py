@@ -20,6 +20,7 @@ EMLU core module.
 """
 
 import json
+from threading import Thread
 
 from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer
 
@@ -29,6 +30,13 @@ from .mount import umount as _umount
 
 from .config import default_conf
 from .daemon import GenericDaemon
+
+
+class MountPoint():
+
+    def __init__(self, mp, name, timeout):
+        self.mp = mp
+        self.timeout = timeout
 
 
 class EMLUDaemon(GenericDaemon):
@@ -43,14 +51,15 @@ class EMLUDaemon(GenericDaemon):
 
         super(EMLUDaemon, self).__init__(config)
 
+        # Register functions
         self.server = SimpleJSONRPCServer((self.addr, self.port))
         self.server.register_function(self.get_mounts)
         self.server.register_function(self.mount)
         self.server.register_function(self.umount)
 
-    def watch(self, mp, timeout):
-        # FIXME Implement
-        pass
+        self.pool = []
+        for i in range(conf['pool']):
+            self.pool.append(Thread(target=self.server.serve_forever))
 
     #--- Exposed methods -------------------------------------------------------
     def get_mounts(self):
@@ -73,8 +82,24 @@ class EMLUDaemon(GenericDaemon):
 
     #--- Daemon methods --------------------------------------------------------
     def loop(self):
+
         print('Starting EMLU server at {}:{}'.format(self.addr, self.port))
-        self.server.serve_forever()
+
+        # Start working threads
+        for t in self.pool:
+            t.start()
+
+        # Block forever
+        while True:
+            sleep(sys.maxint)
 
     def terminate(self):
-        pass
+
+        # Shutdown server (and working threads)
+        self.server.shutdow()
+
+        # FIXME: Umount all opened volumes
+
+        # Wait for all threads to finish
+        for t in self.pool:
+            t.join()

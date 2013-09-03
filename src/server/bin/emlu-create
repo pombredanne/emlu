@@ -16,8 +16,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+Ecrytfs creation utility.
+"""
+
 import os
 import sys
+
+from emlu.config
+
+def add_to_config(mp, name, timeout):
 
 
 def check_root():
@@ -29,3 +37,17 @@ if __name__ == '__main__':
         sys.exit(1)
 
     print('Running as root... ok.')
+
+    '''
+    Notes:
+
+        Two paremeters:
+            - Origin folder
+            - Destination (mount point)
+        Check that both exists.
+        Check that not in fstab.
+        Ask for password.
+        Append line to fstab.
+        Append id to root sig-cache.
+        Append descriptor to EMLU config file.
+    '''

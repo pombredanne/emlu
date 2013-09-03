@@ -30,7 +30,7 @@ default_conf = {
         # Server
         'addr'         : 'localhost',
         'port'         : 6464,
-        'prefork'      : False,
+        'pool'         : 5,
         # Core
         'timeout'      : 30,
         'samba-check'  : True,

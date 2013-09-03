@@ -21,6 +21,7 @@ Command line client for EMLU.
 """
 
 import argparse
+from os.path import is_dir, exists
 
 #from emlu.client import *
 
@@ -45,7 +46,7 @@ def parse_cmd():
         )
 
     group.add_argument('-m', '--mount',
-            metavar='/path/mymount/',
+            metavar='/path/mymount/:[30]',
             help='Mount a EMLU configured ecryptfs mount point.'
         )
 

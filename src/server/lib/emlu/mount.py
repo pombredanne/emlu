@@ -93,7 +93,7 @@ def parse_fstab():
                 lines.append(l)
 
     if not lines:
-        raise Exception("fstab file is empty.")
+        raise Exception('fstab file is empty.')
 
     entries = []
     for l in lines:
@@ -167,11 +167,7 @@ def mount(mp, pwd):
     mts = get_mounts()
 
     # Check if valid mount point
-    md = None
-    for m in mts:
-        if m['mp'] == mp:
-            md = m
-            break
+    md = next((m for m in mts if m['mp'] == mp), None)
     if not md:
         return -1
 
@@ -220,11 +216,7 @@ def umount(mp):
     mts = get_mounts()
 
     # Check if valid mount point
-    md = None
-    for m in mts:
-        if m['mp'] == mp:
-            md = m
-            break
+    md = next((m for m in mts if m['mp'] == mp), None)
     if not md:
         return -1
 
