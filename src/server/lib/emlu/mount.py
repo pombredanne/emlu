@@ -32,8 +32,9 @@ def parse_mount():
 
     [   {   'file_system': 'proc',
             'mp' : '/proc',
+            'type': 'proc',
             'options': ['rw', 'noexec', 'nosuid', 'nodev'],
-            'type': 'proc'}
+        },
         ...
     ]
 
@@ -67,14 +68,32 @@ def parse_mount():
 
 def parse_fstab():
     """
-    Parse the fstab file returning a list of dictionaries of the type:
+    Parse /etc/fstab file using parse_xtab function (see below).
+    """
+    xtab = '/etc/fstab'
+    return parse_xtab(xtab)
 
-    [   {   'dump': '0',
-            'file_system': 'proc',
-            'mp' : '/proc',
-            'options': ['nodev', 'noexec', 'nosuid'],
-            'pass': '0',
-            'type': 'proc'},
+
+def parse_mtab():
+    """
+    Parse /etc/mtab file using parse_xtab function (see below).
+    """
+    xtab = '/etc/mtab'
+    return parse_xtab(xtab)
+
+
+def parse_xtab(xtab):
+    """
+    Parse the xtab file (fstab, mtab) returning a list of dictionaries of the
+    type:
+
+    [   {   'file_system': 'proc',
+            'mp'         : '/proc',
+            'type'       : 'proc',
+            'options'    : ['nodev', 'noexec', 'nosuid'],
+            'dump'       : '0',
+            'pass'       : '0',
+        },
         ...
     ]
 
@@ -83,24 +102,22 @@ def parse_fstab():
         - Exception, if fstab is empty or malformed.
     """
 
-    fstab = '/etc/fstab'
-
     lines = []
-    with open(fstab, 'r') as f:
+    with open(xtab, 'r') as f:
         for l in f:
             l = l.strip()
             if l and not l.startswith('#'):
                 lines.append(l)
 
     if not lines:
-        raise Exception('fstab file is empty.')
+        raise Exception('table file is empty.')
 
     entries = []
     for l in lines:
         parts = l.split()
 
         if len(parts) != 6:
-            raise Exception('fstab is malformed.')
+            raise Exception('table file is malformed.')
 
         entry = {
                 'file_system': parts[0],

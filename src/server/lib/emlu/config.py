@@ -61,13 +61,10 @@ def read_config():
     return conf
 
 
-def write_config(new_conf={}, filename=None):
+def write_config(new_conf={}, filename=config_file):
     """
     Write EMLU configuration file.
     """
-
-    if not filename:
-        filename = config_file
 
     conf = default_conf.copy()
     conf.update(new_conf)

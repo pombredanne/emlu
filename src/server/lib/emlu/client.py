@@ -15,6 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+Library for EMLU client functions.
+"""
+
+from jsonrpclib import Server
+
+
+class EMLUClient(object):
+    pass
+
 # FIXME: Implement
 # Exceptions: DaemonNotFound
 #             CallError

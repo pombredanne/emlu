@@ -23,9 +23,22 @@ Ecrytfs creation utility.
 import os
 import sys
 
-from emlu.config
+from emlu.config import read_config, write_config
 
-def add_to_config(mp, name, timeout):
+def add_to_config(mp, name, timeout=-1):
+
+    conf = read_config()
+
+    record = {
+        'name'    : name,
+        'mp'      : mp,
+        'hidden'  : False,
+        'timeout' : timeout,
+    }
+
+    conf['mounts'].append(record)
+
+    write_config(conf)
 
 
 def check_root():

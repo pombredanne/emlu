@@ -30,6 +30,8 @@ from emlu.mount import *
 if __name__ == '__main__':
     print('################ parse_mount() ################')
     pprint(parse_mount(), indent=4)
+    print('################ parse_mtab() ################')
+    pprint(parse_mtab(), indent=4)
     print('################ parse_fstab() ################')
     pprint(parse_fstab(), indent=4)
 

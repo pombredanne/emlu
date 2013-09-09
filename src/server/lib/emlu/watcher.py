@@ -28,24 +28,60 @@ else:
     from queue import Queue
 from threading import Thread, Event
 
+from .mount import umount
 
-class EMLUWatcher(object):
 
-    class Worker(Thread):
-        def __init__(self):
-            self.event = Event()
-            self.queue = Queue()
+_POLL = 30
+
+class EMLUWatcher(Thread):
 
     def __init__(self):
+        # Communication
+        self._event = Event()
+        self._queue = Queue()
+        # Local
+        self._shutdown = False
+        self._watched = []
 
-        self.worker = Worker()
-        self.worker.start()
+    def run(self):
+        while not self._shutdown:
+            # Wait for event
+            self._event.wait(_POLL)
+            self._event.clear()
 
-    def watch(self, mp, timeout):
-        self.worker.queue.put((True, mp, timeout))
-        self.worker.event.set()
+            # Quit thread if requested
+            if self._shutdown:
+                break
+
+            # Attend messages
+            while True:
+                try:
+                    item = self._queue.get(block=False)
+                    # Fix me, do something with item
+                except Empty as e:
+                    break
+
+            # Attend inotify events
+            # FIXME: Implement.
+
+        # Umount all watched mounts
+        # FIXME: Implement.
+
+
+    #--- Local methods ---------------------------------------------------------
+
+
+    #--- Methods to be called from another thread ------------------------------
+    def stop(self):
+        self._shutdown = True
+        self._event.set()
+
+    def watch(self, mp, timeout=-1):
+        if timeout != 0:
+            self._queue.put((True, mp, timeout))
+            self._event.set()
 
     def unwatch(self, mp):
-        self.worker.queue.put((False, mp))
-        self.worker.event.set()
+        self._queue.put((False, mp))
+        self._event.set()
 
